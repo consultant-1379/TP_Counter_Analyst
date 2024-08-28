@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="TP_Counter_Analyst" default="compile" basedir=".">
+
+	<property name="src-dir" location="src/java/com"/>
+	<property name="build-dir" location="build"/>
+	<property name="classes-dir" value="${build-dir}/classes"/>
+	<property name="lib-dir" value="lib"/>
+	<property name="jar-dir"     value="${build-dir}/jar"/>
+	<property name="main-class"  value="distocraft.dc500.etl.counter.analyst.CounterAnalystMain"/>
+
+	<condition property="bundleBootClasspath" value="${jdk-1.8.0}">
+		<isset property="jdk-1.8.0" />
+	</condition>
+	<condition property="bundleJavacSource" value="15">
+		<isset property="jdk-1.8.0" />
+	</condition>
+
+	<path id="classpath">
+		<fileset dir="${lib-dir}" includes="**/*.jar"/>
+	</path>
+
+	<target name="clean" description="compile the source">
+		<delete dir="${build-dir}" />
+	</target>
+
+	<target name="cleanall" depends="clean"/>
+
+	<target name="init">
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${build-dir}"/>
+		<mkdir dir="${classes-dir}"/>
+		<mkdir dir="${jar-dir}"/>
+	</target>
+
+	<target name="compile" depends="init" description="compile the source " >
+		<javac srcdir="${src-dir}" destdir="${classes-dir}" classpathref="classpath" includeantruntime="false" />
+		<!--<javac srcdir="${src-dir}" destdir="${build-dir}"/>-->
+	</target>
+
+	<target name="jar" depends="compile">
+		<jar destfile="${jar-dir}/${ant.project.name}.jar" basedir="${classes-dir}">
+			<fileset dir="${src-dir}">
+				<include name="*.properties" />
+			</fileset>
+			<manifest>
+				<attribute name="Main-Class" value="${main-class}"/>
+			</manifest>
+			<zipgroupfileset dir="${lib-dir}" includes="*.jar"/>
+		</jar>
+	</target>
+	
+	<target name="zip" depends="jar">
+		<zip destfile="TP_Counter_Analyst.zip">
+		    <fileset dir="${jar-dir}" includes="*.jar"/>
+		    <fileset dir="${src-dir}" includes="logging.properties"/>
+		</zip>
+	</target>
+
+	<target name="run" depends="jar">
+		<java fork="true" classname="${main-class}">
+			<classpath>
+				<path refid="classpath"/>
+				<path location="${jar-dir}/${ant.project.name}.jar"/>
+			</classpath>
+		</java>
+	</target>
+
+</project>
